@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Location</title>
+    <link rel="stylesheet" href="/static/css/home.css">
+    <style>
+        .distance-options {
+            margin-top: 20px;
+        }
+        #map img {
+            width: 100%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search for a Location</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" name="search">Search</button>
+            <button type="submit" name="analyze">Analyze</button>
+            <input type="hidden" name="zoom" id="zoomLevel" value="{{ zoom }}">
+        </form>
+
+        {% if latitude and longitude %}
+            <!-- Radio buttons to select distance -->
+            <div class="distance-options">
+                <p>Select Distance:</p>
+                <label><input type="radio" name="distance" value="5" onclick="updateMap(5)"> 5 miles</label>
+                <label><input type="radio" name="distance" value="10" onclick="updateMap(10)"> 10 miles</label>
+                <label><input type="radio" name="distance" value="15" onclick="updateMap(15)"> 15 miles</label>
+                <label><input type="radio" name="distance" value="20" onclick="updateMap(20)"> 20 miles</label>
+            </div>
+
+            <!-- Display the static map image -->
+            <div id="map">
+                <h3>Google Static Map</h3>
+                <img id="staticMap" src="https://maps.googleapis.com/maps/api/staticmap?center={{ latitude }},{{ longitude }}&zoom={{ zoom }}&size=256x256&maptype=satellite&key=AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA" alt="Static Map of Selected Location">
+            </div>
+        {% else %}
+            <p>No location selected yet. Please enter a location above.</p>
+        {% endif %}
+    </div>
+
+    <script>
+        // Mapping miles to approximate zoom levels
+        const zoomLevels = {
+            5: 15,
+            10: 13,
+            15: 11,
+            20: 9
+        };
+
+        function updateMap(distance) {
+            // Get the corresponding zoom level for the selected distance
+            const zoom = zoomLevels[distance] || 13;
+            const staticMap = document.getElementById('staticMap');
+            document.getElementById('zoomLevel').value = zoom;
+
+            // Update the static map image URL dynamically based on the distance selection and zoom level
+            staticMap.src = `https://maps.googleapis.com/maps/api/staticmap?center={{ latitude }},{{ longitude }}&zoom=${zoom}&size=256x256&maptype=satellite&key=AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA`;
+        }
+    </script>
+</body>
+</html>
