@@ -1,22 +1,179 @@
-<!-- dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Marker Coordinates</title>
-    <link rel="stylesheet" href="/static/css/dashboard.css">
+    <title>Dashboard - Markers</title>
+    <style>
+        /* General Body Styling */
+        body {
+            font-family: "Roboto", sans-serif;
+            background-color: #FFFFFF; /* White background */
+            color: #2F3640;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            font-weight: 700;
+            color: #2C3E50;
+            margin-top: 40px;
+            margin-bottom: 30px;
+        }
+
+        /* Container for all markers */
+        .marker-container {
+            width: 90%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Styling for each marker card */
+        .marker-card {
+            background-color: #FFFFFF; /* White background */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid #bb86fc; /* Purple border */
+            transition: all 0.3s ease-in-out;
+        }
+
+        .marker-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .marker-card p {
+            font-size: 1.1em;
+            color: #34495E;
+            margin: 10px 0;
+        }
+
+        .marker-card strong {
+            font-weight: 600;
+            color: #2C3E50;
+        }
+
+        /* Urgency Level Styling */
+        .urgency {
+            display: inline-block;
+            padding: 5px 10px;
+            font-size: 1em;
+            border-radius: 5px;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
+
+        .urgency.low {
+            background-color: #27AE60;
+            color: white;
+        }
+
+        .urgency.moderate {
+            background-color: #F39C12;
+            color: white;
+        }
+
+        .urgency.high {
+            background-color: #E67E22;
+            color: white;
+        }
+
+        .urgency.critical {
+            background-color: #E74C3C;
+            color: white;
+        }
+
+        /* Footer styling */
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 1em;
+            color: #BDC3C7;
+            text-align: center;
+        }
+
+        /* Styling for the Google Maps link */
+        .google-maps-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #3498DB;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .google-maps-link:hover {
+            background-color: #2980B9;
+        }
+    </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Dashboard - Marker Coordinates</h1>
-        <ul>
-            {% for marker in markers %}
-                <li>Latitude: {{ marker.latitude }}, Longitude: {{ marker.longitude }}</li>
-            {% empty %}
-                <li>No markers found.</li>
-            {% endfor %}
-        </ul>
+    <h1>Dashboard - Reported Markers</h1>
+    <div class="marker-container">
+        {% for marker in markers %}
+        <div class="marker-card">
+            <p><strong>Latitude:</strong> {{ marker.latitude }}</p>
+            <p><strong>Longitude:</strong> {{ marker.longitude }}</p>
+            <p><strong>Urgency Level:</strong>
+                <span class="urgency
+                    {% if marker.urgency == 'low' %}low{% endif %}
+                    {% if marker.urgency == 'moderate' %}moderate{% endif %}
+                    {% if marker.urgency == 'high' %}high{% endif %}
+                    {% if marker.urgency == 'critical' %}critical{% endif %}
+                ">
+                    {{ marker.urgency|capfirst }}
+                </span>
+            </p>
+            <!-- Google Maps link to get directions -->
+            <a href="#" class="google-maps-link"
+               data-latitude="{{ marker.latitude }}"
+               data-longitude="{{ marker.longitude }}">
+                Get Directions on Google Maps
+            </a>
+        </div>
+        {% endfor %}
     </div>
+
+    <footer>
+        <p>&copy; 2024 FireApp | All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Use the geolocation API to get the user's current location
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var userLatitude = position.coords.latitude;
+                var userLongitude = position.coords.longitude;
+
+                // Select all the Google Maps links
+                var links = document.querySelectorAll('.google-maps-link');
+                links.forEach(function(link) {
+                    var destinationLat = link.getAttribute('data-latitude');
+                    var destinationLng = link.getAttribute('data-longitude');
+
+                    // Check if both destination coordinates are available
+                    if (destinationLat && destinationLng) {
+                        // Update the href for each link to include the user's coordinates
+                        link.href = "https://www.google.com/maps/dir/?api=1&origin=" + userLatitude + "," + userLongitude + "&destination=" + destinationLat + "," + destinationLng;
+                    }
+                });
+            });
+        } else {
+            alert("Geolocation is not supported by this browser.");
+        }
+    </script>
 </body>
+
 </html>

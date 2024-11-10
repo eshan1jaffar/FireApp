@@ -6,28 +6,169 @@
     <title>Report - Current Location</title>
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA&libraries=places"></script>
     <style>
-        /* Basic styling for the urgency buttons */
+        /* General Body Styling */
+        body {
+            font-family: "Roboto", sans-serif;
+            color: #2F3640;
+            background-color: #FFFFFF;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        /* Header Styling */
+        header {
+            width: 100%;
+            background-color: #000000;
+            color: #FFFFFF;
+            padding: 20px 0;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+
+        header h1 {
+            font-size: 1.8em;
+            margin-left: 20px;
+        }
+
+        header .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #bb86fc;
+        }
+
+        header nav a {
+            color: #FFFFFF;
+            text-decoration: none;
+            margin-right: 20px;
+        }
+
+        /* Body content margin to account for fixed header */
+        main {
+            margin-top: 100px;
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+        }
+
+        /* Map Container Styling */
+        .map-container {
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Urgency Selection Container */
+        .urgency-selection {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        .urgency-selection h2 {
+            font-size: 1.5em;
+            color: #2C3E50;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .urgency-options {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* Urgency Button Styling */
         .urgency-button {
             display: flex;
             align-items: center;
-            gap: 5px;
-            padding: 8px;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 18px;
+            font-size: 1.2em;
+            font-weight: 500;
+            border: 2px solid #BDC3C7;
+            border-radius: 8px;
+            background-color: #FFFFFF;
+            color: #2F3640;
             cursor: pointer;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background-color: #f9f9f9;
-            font-size: 14px;
-            margin: 5px;
+            transition: all 0.3s ease-in-out;
         }
+
+        .urgency-button:hover {
+            border-color: #3498DB;
+            background-color: #ECF0F1;
+        }
+
+        .urgency-button:focus {
+            outline: none;
+            border-color: #3498DB;
+        }
+
         .urgency-marker {
-            width: 15px;
-            height: 15px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
         }
-        .low-urgency { background-color: green; }
-        .moderate-urgency { background-color: yellow; }
-        .high-urgency { background-color: orange; }
-        .critical-urgency { background-color: red; }
+
+        .low { background-color: #27AE60; }
+        .moderate { background-color: #F39C12; }
+        .high { background-color: #E67E22; }
+        .critical { background-color: #E74C3C; }
+
+        /* Confirm Button Styling */
+        .confirm-report {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .confirm-button {
+            padding: 15px 30px;
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #FFFFFF;
+            background-color: #bb86fc;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+        }
+
+        .confirm-button:disabled {
+            background-color: #BDC3C7;
+            cursor: not-allowed;
+        }
+
+        .confirm-button:hover:enabled {
+            background-color: #9B4F96;
+            transform: translateY(-3px);
+        }
+
+        .confirm-button:focus {
+            outline: none;
+            box-shadow: 0 0 10px rgba(187, 134, 252, 0.5);
+        }
     </style>
     <script>
         let map;
@@ -54,13 +195,16 @@
 
             // Add a click event listener on the map to capture the clicked location
             map.addListener("click", function(event) {
-                if (selectedUrgency) {
+                if (selectedUrgency) {  // Ensure urgency is selected before placing marker
                     lat = event.latLng.lat();  // Get latitude
                     lng = event.latLng.lng();  // Get longitude
                     placeMarker(event.latLng);
                     document.getElementById("id_latitude").value = lat;  // Set the value of hidden latitude field
                     document.getElementById("id_longitude").value = lng;  // Set the value of hidden longitude field
                     document.getElementById("id_urgency").value = selectedUrgency;  // Set the value of hidden urgency field
+
+                    // Enable the confirm button after placing the marker
+                    document.getElementById("confirm-button").disabled = false;
                 } else {
                     alert("Please select an urgency level first.");
                 }
@@ -84,96 +228,86 @@
         // Function to select urgency level and set the selected urgency color
         function selectUrgency(urgency) {
             selectedUrgency = urgency;
-            alert(`Selected urgency: ${urgency.charAt(0).toUpperCase() + urgency.slice(1)}`);
+            //alert(`Selected urgency: ${urgency.charAt(0).toUpperCase() + urgency.slice(1)}`);
         }
 
         // Function to place a marker based on the selected urgency color
         function placeMarker(location) {
-    let iconUrl;
-    switch (selectedUrgency) {
-        case 'low':
-            iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
-            break;
-        case 'moderate':
-            iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
-            break;
-        case 'high':
-            iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
-            break;
-        case 'critical':
-            iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
-            break;
-        default:
-            return;
-    }
+            let iconUrl;
+            switch (selectedUrgency) {
+                case 'low':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                    break;
+                case 'moderate':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+                    break;
+                case 'high':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
+                    break;
+                case 'critical':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+                    break;
+                default:
+                    return;
+            }
 
-    // Place the marker at the clicked location
-    const marker = new google.maps.Marker({
-        position: location,
-        map: map,
-        icon: iconUrl,
-    });
-
-    // Get the latitude and longitude
-    const lat = location.lat();
-    const lng = location.lng();
-
-    // Send an AJAX request to save the marker to the database
-    fetch("{% url 'report' %}", {  // URL to your Django view
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,  // CSRF token
-        },
-        body: JSON.stringify({
-            latitude: lat,
-            longitude: lng,
-            urgency: selectedUrgency,
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            console.log("Marker saved successfully!");
-        } else {
-            console.error("Error saving marker");
+            // Place the marker at the clicked location
+            new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: iconUrl,
+            });
         }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-    });
-}</script>
+    </script>
 </head>
 <body onload="getUserLocation()">
-    <h1>Your Current Location</h1>
-    <div id="map" style="height: 500px; width: 100%; margin-bottom: 20px;"></div>
+    <header>
+        <div class="logo">FireReport</div>
+        <nav>
+            <a href="#">Home</a>
+            <a href="#">Contact</a>
+        </nav>
+    </header>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
-        <button class="urgency-button" onclick="selectUrgency('low')">
-            <div class="urgency-marker low-urgency"></div>
-            Low Urgency
-        </button>
-        <button class="urgency-button" onclick="selectUrgency('moderate')">
-            <div class="urgency-marker moderate-urgency"></div>
-            Moderate Urgency
-        </button>
-        <button class="urgency-button" onclick="selectUrgency('high')">
-            <div class="urgency-marker high-urgency"></div>
-            High Urgency
-        </button>
-        <button class="urgency-button" onclick="selectUrgency('critical')">
-            <div class="urgency-marker critical-urgency"></div>
-            Critical Urgency
-        </button>
-    </div>
+    <main>
+        <h1>Report a Fire</h1>
+        <p>Select the urgency level and place a marker on the map to report a fire.</p>
 
-    <!-- Form to submit the marker details to the server -->
-    <form method="POST" action="{% url 'report' %}">
-        {% csrf_token %}
-        <input type="hidden" id="id_latitude" name="latitude">
-        <input type="hidden" id="id_longitude" name="longitude">
-        <input type="hidden" id="id_urgency" name="urgency">
-        <button type="submit">Submit Marker</button>
-    </form>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="urgency-selection">
+            <h2>Select Urgency Level</h2>
+            <div class="urgency-options">
+                <button class="urgency-button" onclick="selectUrgency('low')">
+                    <div class="urgency-marker low"></div>
+                    Low Urgency
+                </button>
+                <button class="urgency-button" onclick="selectUrgency('moderate')">
+                    <div class="urgency-marker moderate"></div>
+                    Moderate Urgency
+                </button>
+                <button class="urgency-button" onclick="selectUrgency('high')">
+                    <div class="urgency-marker high"></div>
+                    High Urgency
+                </button>
+                <button class="urgency-button" onclick="selectUrgency('critical')">
+                    <div class="urgency-marker critical"></div>
+                    Critical Urgency
+                </button>
+            </div>
+        </div>
+
+        <div class="confirm-report">
+            <form method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="latitude" id="id_latitude">
+                <input type="hidden" name="longitude" id="id_longitude">
+                <input type="hidden" name="urgency" id="id_urgency">
+                <button type="submit" class="confirm-button" id="confirm-button" disabled>Confirm Report</button>
+            </form>
+        </div>
+    </main>
 </body>
 </html>

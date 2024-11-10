@@ -62,11 +62,20 @@ def report(request):
 
     return render(request, 'reporter/reporter.html')
 
+
 def dashboard(request):
-    # Fetch all markers from the database
+    # Get all markers
     markers = Marker.objects.all()
 
-    context = {
-        'markers': markers
+    # Sort markers by urgency level
+    urgency_order = {
+        'critical': 1,
+        'high': 2,
+        'moderate': 3,
+        'low': 4
     }
-    return render(request, 'reporter/dashboard.html', context)
+
+    # Sort the markers based on urgency
+    markers = sorted(markers, key=lambda x: urgency_order.get(x.urgency, 5))
+
+    return render(request, 'reporter/dashboard.html', {'markers': markers})
