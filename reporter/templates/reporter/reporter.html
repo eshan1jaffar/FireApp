@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report - Current Location</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA&libraries=places"></script>
+    <style>
+        /* Basic styling for the urgency buttons */
+        .urgency-button {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .urgency-marker {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+        }
+        .low-urgency { background-color: green; }
+        .moderate-urgency { background-color: yellow; }
+        .high-urgency { background-color: orange; }
+        .critical-urgency { background-color: red; }
+    </style>
+    <script>
+        let map;
+        let selectedUrgency = null;
+
+        function initMap(userLat, userLng) {
+            const userLocation = { lat: userLat, lng: userLng };
+
+            map = new google.maps.Map(document.getElementById("map"), {
+                center: userLocation,
+                zoom: 15,
+                mapTypeId: google.maps.MapTypeId.SATELLITE,
+                streetViewControl: false,
+                mapTypeControl: false,
+            });
+
+            // Place a blue marker on the user's location
+            new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
+            });
+
+            // Add a click event listener on the map to place a marker
+            map.addListener("click", function(event) {
+                if (selectedUrgency) {
+                    placeMarker(event.latLng);
+                } else {
+                    alert("Please select an urgency level first.");
+                }
+            });
+        }
+
+        function getUserLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const userLat = position.coords.latitude;
+                    const userLng = position.coords.longitude;
+                    initMap(userLat, userLng);  // Initialize map with user's location
+                }, function(error) {
+                    alert("Error getting location: " + error.message);
+                });
+            } else {
+                alert("Geolocation is not supported by this browser.");
+            }
+        }
+
+        // Function to select urgency level and set the selected urgency color
+        function selectUrgency(urgency) {
+            selectedUrgency = urgency;
+            alert(`Selected urgency: ${urgency.charAt(0).toUpperCase() + urgency.slice(1)}`);
+        }
+
+        // Function to place a marker based on the selected urgency color
+        function placeMarker(location) {
+            let iconUrl;
+            switch (selectedUrgency) {
+                case 'low':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                    break;
+                case 'moderate':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+                    break;
+                case 'high':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
+                    break;
+                case 'critical':
+                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+                    break;
+                default:
+                    return;
+            }
+
+            // Place the marker at the clicked location without a title
+            new google.maps.Marker({
+                position: location,
+                map: map,
+                icon: iconUrl,
+            });
+        }
+    </script>
+</head>
+<body onload="getUserLocation()">
+    <h1>Your Current Location</h1>
+    <div id="map" style="height: 500px; width: 100%; margin-bottom: 20px;"></div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px;">
+        <button class="urgency-button" onclick="selectUrgency('low')">
+            <div class="urgency-marker low-urgency"></div>
+            Low Urgency
+        </button>
+        <button class="urgency-button" onclick="selectUrgency('moderate')">
+            <div class="urgency-marker moderate-urgency"></div>
+            Moderate Urgency
+        </button>
+        <button class="urgency-button" onclick="selectUrgency('high')">
+            <div class="urgency-marker high-urgency"></div>
+            High Urgency
+        </button>
+        <button class="urgency-button" onclick="selectUrgency('critical')">
+            <div class="urgency-marker critical-urgency"></div>
+            Critical Urgency
+        </button>
+    </div>
+</body>
+</html>
