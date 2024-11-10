@@ -12,6 +12,7 @@ from .models import Marker
 
 from django.shortcuts import render
 from .models import Marker
+from django.conf import settings
 
 
 
@@ -53,14 +54,16 @@ def report(request):
                     latitude = float(latitude)
                     longitude = float(longitude)
                 except ValueError:
-                    return render(request, 'reporter/reporter.html', {'error': 'Invalid latitude or longitude'})
+                    return render(request, 'reporter/reporter.html', {'error': 'Invalid latitude or longitude',
+                                                                      'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY})
 
                 Marker.objects.create(latitude=latitude, longitude=longitude, urgency=urgency)
                 return redirect('dashboard')  # Redirect to the dashboard after saving the marker
             else:
-                return render(request, 'reporter/reporter.html', {'error': 'Please select a valid location and urgency.'})
+                return render(request, 'reporter/reporter.html', {'error': 'Please select a valid location and urgency.',
+                                                                  'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY})
 
-    return render(request, 'reporter/reporter.html')
+    return render(request, 'reporter/reporter.html', {'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY})
 
 
 def dashboard(request):

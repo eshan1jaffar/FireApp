@@ -12,6 +12,21 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+load_dotenv()
+
+GOOGLE_MAPS_API_KEY = os.getenv('GOOGLE_MAPS_API_KEY')
+FIREBASE_API_KEY = os.getenv('FIREBASE_API_KEY')
+AUTH_DOMAIN = os.getenv('AUTH_DOMAIN')
+PROJECT_ID = os.getenv('PROJECT_ID')
+STORAGE_BUCKET = os.getenv('STORAGE_BUCKET')
+MESSAGING_SENDER_ID = os.getenv('MESSAGING_SENDER_ID')
+APP_ID = os.getenv('APP_ID')
+MEASUREMENT_ID = os.getenv('MEASUREMENT_ID')
+FIREBASE_JSON_KEY = os.getenv('FIREBASE_JSON_KEY')
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -115,13 +130,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-GOOGLE_MAPS_API_KEY = 'AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA'
-
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -131,5 +144,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 import os
 
 # Define the path for media files
-MEDIA_URL = '/media/'
+MEDIA_URL = '/  media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

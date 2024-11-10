@@ -4,36 +4,91 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Report - Current Location</title>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA&libraries=places"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key={{ GOOGLE_MAPS_API_KEY }}&libraries=places"></script>
     <style>
         /* General Body Styling */
         body {
-            font-family: "Roboto", sans-serif;
-            color: #2F3640;
-            background-color: #FFFFFF;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
             margin: 0;
-            padding: 0;
-            line-height: 1.5;
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f9; /* Soft background */
+            color: #333;
         }
 
-        /* Header Styling */
+        /* Header styles */
         header {
-            width: 100%;
-            background-color: #000000;
-            color: #FFFFFF;
-            padding: 20px 0;
-            text-align: left;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            padding: 20px 30px;
+            background-color: #1b1b27; /* Dark background */
+            color: white;
+            font-family: 'Roboto', sans-serif;
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
+            width: 100%;
             z-index: 1000;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        header img {
+            height: 40px;
+            margin-right: 15px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin: 0;
+            color: #bb86fc;
+        }
+
+        nav {
+            background-color: #333;
+            padding: 10px 0;
+            position: fixed;
+            top: 70px; /* Below the header */
+            left: 0;
+            width: 100%;
+            z-index: 999;
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin: 0 20px;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        nav ul li a:hover {
+            color: #bb86fc;
+        }
+
+        /* Body padding to avoid overlap with fixed header and navbar */
+        .container {
+            margin: 140px auto auto auto; /* Adjusted padding */
+            max-width: 960px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        /* Body padding to avoid overlap with fixed header */
+        .container {
+            margin: 180px auto auto auto; /* Increased padding to move content down */
+            max-width: 960px;
+            padding: 40px 20px;
+            text-align: center;
         }
 
         header h1 {
@@ -54,11 +109,14 @@
         }
 
         /* Body content margin to account for fixed header */
-        main {
-            margin-top: 100px;
+         main {
+            margin-top: 160px; /* Adjusted to fit under header and navbar */
             width: 100%;
-            max-width: 900px;
+            max-width: 960px; /* Set maximum width for centering */
             padding: 20px;
+            margin-left: auto;
+            margin-right: auto; /* Centers the content */
+            text-align: center;
         }
 
         /* Map Container Styling */
@@ -262,11 +320,21 @@
 </head>
 <body onload="getUserLocation()">
     <header>
-        <div class="logo">FireReport</div>
+        <div class="logo">blAIze Report</div>
+        <header>
+            <img src="https://cdn-icons-png.flaticon.com/512/7146/7146872.png" alt="Fire Logo">
+            <h1>Fire Detection</h1>
+        </header>
         <nav>
-            <a href="#">Home</a>
-            <a href="#">Contact</a>
-        </nav>
+        <ul>
+            <li><a href="/homePage">Home</a></li>
+            <li><a href="/homePage/search">blAIze Detection</a></li>
+            <li><a href="/reporter">blAIze Report</a></li>
+            <li><a href="/reporter/dashboard/">Dashboard</a></li>
+            <li><a href="/chatbot">flAIr</a></li>
+        </ul>
+    </nav>
+
     </header>
 
     <main>

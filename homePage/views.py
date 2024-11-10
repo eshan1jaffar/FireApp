@@ -9,7 +9,6 @@ from django.shortcuts import render
 from FireApp import settings
 from homePage.forms import LocationForm
 
-
 def home(request):
     return render(request, 'homePage/home.html')
 
@@ -20,6 +19,7 @@ from urllib.parse import urlencode
 from django.conf import settings
 from django.shortcuts import render
 from .forms import LocationForm
+from .ml_model.model import predict
 
 def search(request):
     image_url = None  # Initialize image_url to None in case it's not created yet
@@ -35,7 +35,7 @@ def search(request):
             encoded_location = urlencode({'address': location})
 
             # Google Maps Geocoding API request URL
-            google_maps_api_key = 'AIzaSyAAEzkGoGPmo780TKHqvycfR12p1wHzHxA'
+            google_maps_api_key = settings.GOOGLE_MAPS_API_KEY
             geocode_url = f'https://maps.googleapis.com/maps/api/geocode/json?{encoded_location}&key={google_maps_api_key}'
 
             # Make the API request
@@ -89,12 +89,33 @@ def search(request):
                             img_file.write(map_response.content)
 
                         # Set image_url to the saved image path
-                        image_url = os.path.join(settings.MEDIA_URL, 'images', image_name)
+                        image_url = os.path.join(settings.STATIC_ROOT, 'homePage', 'images', 'photo.jpeg')
+
+                        decision, prediction = predict(image_path)
+                        prediction = round(prediction[0] * 100, 2)
+                        decision = "No Wildfire" if decision == 0 else "Wildfire"
+                        color = "red" if prediction > 50 else "black"
+                        print(decision, prediction)
 
                     else:
                         form.add_error(None, f'Failed to retrieve the map image. Status code: {map_response.status_code}')
                 else:
-                    form.add_error(None, 'Analyze button not clicked.')
+                    return render(request, 'homePage/search.html', {
+                        'form': form,
+                        'latitude': latitude,
+                        'longitude': longitude,
+                        'zoom': zoom,
+                        'image_url': image_url,
+                        'analyzed': False,
+                        'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
+                        'FIREBASE_API_KEY': settings.FIREBASE_API_KEY,
+                        'AUTH_DOMAIN': settings.AUTH_DOMAIN,
+                        'PROJECT_ID': settings.PROJECT_ID,
+                        'STORAGE_BUCKET': settings.STORAGE_BUCKET,
+                        'MESSAGING_SENDER_ID': settings.MESSAGING_SENDER_ID,
+                        'APP_ID': settings.APP_ID,
+                        'MEASUREMENT_ID': settings.MEASUREMENT_ID
+                    })
 
                 # Render the template with the form, coordinates, zoom, and image URL
                 return render(request, 'homePage/search.html', {
@@ -102,7 +123,19 @@ def search(request):
                     'latitude': latitude,
                     'longitude': longitude,
                     'zoom': zoom,
-                    'image_url': image_url
+                    'image_url': image_url,
+                    'analyzed': True,
+                    'decision': decision,
+                    'prediction': prediction,
+                    'color': color,
+                    'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
+                    'FIREBASE_API_KEY': settings.FIREBASE_API_KEY,
+                    'AUTH_DOMAIN': settings.AUTH_DOMAIN,
+                    'PROJECT_ID': settings.PROJECT_ID,
+                    'STORAGE_BUCKET': settings.STORAGE_BUCKET,
+                    'MESSAGING_SENDER_ID': settings.MESSAGING_SENDER_ID,
+                    'APP_ID': settings.APP_ID,
+                    'MEASUREMENT_ID': settings.MEASUREMENT_ID
                 })
 
             else:
@@ -111,6 +144,42 @@ def search(request):
     else:
         form = LocationForm()
 
-    return render(request, 'homePage/search.html', {'form': form})
+    return render(request, 'homePage/search.html', {'form': form,
+                                                    'GOOGLE_MAPS_API_KEY': settings.GOOGLE_MAPS_API_KEY,
+                                                    'FIREBASE_API_KEY': settings.FIREBASE_API_KEY,
+                                                    'AUTH_DOMAIN': settings.AUTH_DOMAIN,
+                                                    'PROJECT_ID': settings.PROJECT_ID,
+                                                    'STORAGE_BUCKET': settings.STORAGE_BUCKET,
+                                                    'MESSAGING_SENDER_ID': settings.MESSAGING_SENDER_ID,
+                                                    'APP_ID': settings.APP_ID,
+                                                    'MEASUREMENT_ID': settings.MEASUREMENT_ID})
 
 
+import os
+from django.conf import settings
+from .models import OverlayImage
+
+
+def save_overlay_image(image_path):
+    # Define the path for the image in the media folder
+    media_path = os.path.join(settings.MEDIA_ROOT, 'images', 'overlay.jpg')
+
+    # Ensure the image file exists at the given path
+    if os.path.exists(media_path):
+        # Create an instance of the OverlayImage model and save the image
+        overlay_image = OverlayImage(image=f'images/overlay.jpg')  # Path is relative to MEDIA_ROOT
+        overlay_image.save()
+
+        return overlay_image
+    else:
+        print("Image does not exist at the specified path")
+        return None
+
+from django.shortcuts import render
+from .models import OverlayImage
+
+def overlay_view(request):
+    # Retrieve the most recently saved overlay image
+    overlay_image = OverlayImage.objects.last()  # You can modify this query as needed
+
+    return render(request, 'homePage/overlay.html', {'overlay_image': overlay_image})
