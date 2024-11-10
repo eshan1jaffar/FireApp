@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        .box {
+            background-color: black;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.7); /* Slight background overlay */
+            display: flex; /* Always display the modal */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .content {
+            position: relative;
+            background: black;
+            padding: 1em 2em;
+            border-radius: 4px;
+            width: 500px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="box">
+        <!-- The modal will automatically be displayed without a button click -->
+        <div class="modal">
+            <div class="content">
+                <iframe src="https://cdn.botpress.cloud/webchat/v2.2/shareable.html?configUrl=https://files.bpcontent.cloud/2024/11/10/05/20241110051553-HMC099PR.json"
+                    width="100%" height="800px" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                </iframe>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

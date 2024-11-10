@@ -64,4 +64,16 @@ button:hover {
   background-color: #9e61d9; /* Slightly darker purple on hover */
 }
 
+.button {
+  background-color: #bb86fc; /* Purple button */
+  color: #121212; /* Dark text on button */
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
 

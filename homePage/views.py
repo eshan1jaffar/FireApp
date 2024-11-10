@@ -13,27 +13,6 @@ from homePage.forms import LocationForm
 def home(request):
     return render(request, 'homePage/home.html')
 
-import os
-import requests
-from urllib.parse import urlencode
-from django.conf import settings
-from django.shortcuts import render
-from .forms import LocationForm
-
-
-import os
-import requests
-from urllib.parse import urlencode
-from django.conf import settings
-from django.shortcuts import render
-from .forms import LocationForm
-
-import os
-import requests
-from urllib.parse import urlencode
-from django.conf import settings
-from django.shortcuts import render
-from .forms import LocationForm
 
 import os
 import requests
