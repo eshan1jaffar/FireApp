@@ -1,0 +1,22 @@
+<!-- dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Marker Coordinates</title>
+    <link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Dashboard - Marker Coordinates</h1>
+        <ul>
+            {% for marker in markers %}
+                <li>Latitude: {{ marker.latitude }}, Longitude: {{ marker.longitude }}</li>
+            {% empty %}
+                <li>No markers found.</li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

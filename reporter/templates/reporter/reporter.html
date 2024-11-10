@@ -32,6 +32,7 @@
     <script>
         let map;
         let selectedUrgency = null;
+        let lat, lng; // To store latitude and longitude
 
         function initMap(userLat, userLng) {
             const userLocation = { lat: userLat, lng: userLng };
@@ -51,10 +52,15 @@
                 icon: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png",
             });
 
-            // Add a click event listener on the map to place a marker
+            // Add a click event listener on the map to capture the clicked location
             map.addListener("click", function(event) {
                 if (selectedUrgency) {
+                    lat = event.latLng.lat();  // Get latitude
+                    lng = event.latLng.lng();  // Get longitude
                     placeMarker(event.latLng);
+                    document.getElementById("id_latitude").value = lat;  // Set the value of hidden latitude field
+                    document.getElementById("id_longitude").value = lng;  // Set the value of hidden longitude field
+                    document.getElementById("id_urgency").value = selectedUrgency;  // Set the value of hidden urgency field
                 } else {
                     alert("Please select an urgency level first.");
                 }
@@ -83,32 +89,60 @@
 
         // Function to place a marker based on the selected urgency color
         function placeMarker(location) {
-            let iconUrl;
-            switch (selectedUrgency) {
-                case 'low':
-                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
-                    break;
-                case 'moderate':
-                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
-                    break;
-                case 'high':
-                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
-                    break;
-                case 'critical':
-                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
-                    break;
-                default:
-                    return;
-            }
+    let iconUrl;
+    switch (selectedUrgency) {
+        case 'low':
+            iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+            break;
+        case 'moderate':
+            iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+            break;
+        case 'high':
+            iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png";
+            break;
+        case 'critical':
+            iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+            break;
+        default:
+            return;
+    }
 
-            // Place the marker at the clicked location without a title
-            new google.maps.Marker({
-                position: location,
-                map: map,
-                icon: iconUrl,
-            });
+    // Place the marker at the clicked location
+    const marker = new google.maps.Marker({
+        position: location,
+        map: map,
+        icon: iconUrl,
+    });
+
+    // Get the latitude and longitude
+    const lat = location.lat();
+    const lng = location.lng();
+
+    // Send an AJAX request to save the marker to the database
+    fetch("{% url 'report' %}", {  // URL to your Django view
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,  // CSRF token
+        },
+        body: JSON.stringify({
+            latitude: lat,
+            longitude: lng,
+            urgency: selectedUrgency,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Marker saved successfully!");
+        } else {
+            console.error("Error saving marker");
         }
-    </script>
+    })
+    .catch(error => {
+        console.error("Error:", error);
+    });
+}</script>
 </head>
 <body onload="getUserLocation()">
     <h1>Your Current Location</h1>
@@ -132,5 +166,14 @@
             Critical Urgency
         </button>
     </div>
+
+    <!-- Form to submit the marker details to the server -->
+    <form method="POST" action="{% url 'report' %}">
+        {% csrf_token %}
+        <input type="hidden" id="id_latitude" name="latitude">
+        <input type="hidden" id="id_longitude" name="longitude">
+        <input type="hidden" id="id_urgency" name="urgency">
+        <button type="submit">Submit Marker</button>
+    </form>
 </body>
 </html>
